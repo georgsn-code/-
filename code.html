@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Космическая шахматная арена</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #020817;
+      color: white;
+      overflow: hidden;
+    }
+
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(80, 200, 255, 0.25), transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2), transparent 15%),
+        linear-gradient(135deg, #020817, #061633, #000);
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .content {
+      position: relative;
+      z-index: 5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 700px;
+      padding-left: 8%;
+      background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.65),
+        rgba(0, 0, 0, 0)
+      );
+    }
+
+    .badge {
+      width: fit-content;
+      padding: 10px 16px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(120, 230, 255, 0.6);
+      border-radius: 999px;
+      color: #bff8ff;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: rgba(0, 20, 50, 0.45);
+      box-shadow: 0 0 25px rgba(0, 200, 255, 0.35);
+    }
+
+    h1 {
+      font-size: clamp(42px, 7vw, 86px);
+      line-height: 0.95;
+      text-transform: uppercase;
+      text-shadow:
+        0 0 12px white,
+        0 0 35px #35d7ff,
+        0 0 80px #1e6cff;
+    }
+
+    h1 span {
+      display: block;
+      color: #8eeaff;
+    }
+
+    p {
+      margin-top: 24px;
+      font-size: 20px;
+      line-height: 1.5;
+      color: #d9f8ff;
+      max-width: 560px;
+      text-shadow: 0 0 15px rgba(80, 220, 255, 0.5);
+    }
+
+    .buttons {
+      margin-top: 34px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    a {
+      text-decoration: none;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(160, 240, 255, 0.8);
+      background: rgba(30, 180, 255, 0.22);
+      box-shadow:
+        0 0 25px rgba(40, 210, 255, 0.4),
+        inset 0 0 20px rgba(255, 255, 255, 0.12);
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    a:hover {
+      background: rgba(80, 220, 255, 0.35);
+      box-shadow: 0 0 40px rgba(80, 220, 255, 0.75);
+    }
+
+    @media (max-width: 700px) {
+      .content {
+        padding: 30px;
+        justify-content: flex-end;
+        padding-bottom: 70px;
+      }
+
+      p {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <section class="hero">
+    <canvas id="scene"></canvas>
+
+    <div class="content">
+      <div class="badge">Deep Space Chess Arena</div>
+
+      <h1>
+        Космическая
+        <span>шахматная арена</span>
+      </h1>
+
+      <p>
+        Эпическая sci‑fi 3D-сцена: футуристическая шахматная доска в глубоком космосе,
+        холодный неон, белый свет звёзд, энергетические вспышки и героическое напряжение.
+      </p>
+
+      <div class="buttons">
+        <a href="#">Войти на арену</a>
+        <a href="#">Начать игру</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+  <script>
+    const canvas = document.getElementById("scene");
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x061633, 0.035);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true
+    });
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.25;
+
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+
+    camera.position.set(7, 6, 10);
+    camera.lookAt(0, 0, 0);
+
+    const world = new THREE.Group();
+    scene.add(world);
+
+    const arena = new THREE.Group();
+    arena.rotation.y = -0.55;
+    world.add(arena);
+
+    const ambient = new THREE.AmbientLight(0x8eeaff, 0.45);
+    scene.add(ambient);
+
+    const whiteLight = new THREE.PointLight(0xffffff, 7, 45);
+    whiteLight.position.set(-4, 7, 5);
+    scene.add(whiteLight);
+
+    const blueLight = new THREE.PointLight(0x39d8ff, 8, 40);
+    blueLight.position.set(3, 4, 2);
+    scene.add(blueLight);
+
+    const backLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    backLight.position.set(-6, 10, -8);
+    scene.add(backLight);
+
+    function glowTexture(color) {
+      const c = document.createElement("canvas");
+      c.width = 128;
+      c.height = 128;
+      const ctx = c.getContext("2d");
+
+      const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, color);
+      g.addColorStop(0.35, color);
+      g.addColorStop(1, "rgba(255,255,255,0)");
+
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 128, 128);
+
+      return new THREE.CanvasTexture(c);
+    }
+
+    const starMap = glowTexture("rgba(255,255,255,1)");
+    const blueMap = glowTexture("rgba(90,220,255,1)");
+
+    function createStars(count, radius, size) {
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+
+      for (let i = 0; i < count; i++) {
+        const r = radius * (0.35 + Math.random() * 0.65);
+        const a = Math.random() * Math.PI * 2;
+        const b = Math.acos(2 * Math.random() - 1);
+
+        pos[i * 3] = r * Math.sin(b) * Math.cos(a);
+        pos[i * 3 + 1] = r * Math.cos(b);
+        pos[i * 3 + 2] = r * Math.sin(b) * Math.sin(a);
+      }
+
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+
+      const mat = new THREE.PointsMaterial({
+        size,
+        map: starMap,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      const stars = new THREE.Points(geo, mat);
+      scene.add(stars);
+      return stars;
+    }
+
+    const stars1 = createStars(1400, 230, 1.1);
+    const stars2 = createStars(500,
